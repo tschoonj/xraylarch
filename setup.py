@@ -33,14 +33,10 @@ with open(os.path.join('lib', 'version.py'), 'r') as version_file:
 
 required_modules = {'numpy': 'numpy',
                     'scipy': 'scipy',
-                    'matplotlib': 'matplotlib',
-                    'h5py': 'h5py',
                     'sqlalchemy': 'sqlalchemy',
-                    'requests': 'requests',
                     'six' : 'six',
                     'psutil': 'psutil',
                     'peakutils': 'peakutils',
-                    'PIL' : 'pillow',
                     'asteval': 'asteval',
                     'uncertainties': 'uncertainties',
                     'lmfit': 'lmfit',
@@ -48,32 +44,9 @@ required_modules = {'numpy': 'numpy',
                     'termcolor': 'termcolor'}
 
 
-graphics_modules = {'wx': 'wxPython',
-                    'wxmplot': 'wxmplot',
-                    'wxutils': 'wxutils'}
-
-xrd_modules  = {'pyFAI': 'pyFAI', 'CifFile' : 'PyCifRW',
-                'fabio': 'fabio'}
-
-tomo_modules = {'tomopy': 'tomopy',
-                'skimage': 'scikit-image'}
-
-epics_modules = {'epics': 'pyepics'}
-scan_modules = {'epicsscan': 'epicsscan', 'psycopg2': 'psycopg2'}
-
-spec_modules = {'silx': 'silx'}
-pca_modules = {'sklearn': 'scikit-learn'}
-
 testing_modules = {'nose': 'nose', 'pytest': 'pytest'}
 
 all_modules = (('basic analysis', required_modules),
-               ('graphics and plotting', graphics_modules),
-               ('xrd modules', xrd_modules),
-               ('tomography modules', tomo_modules),
-               ('connecting to the EPICS control system', epics_modules),
-               ('reading Spec files', spec_modules),
-               ('PCA and machine learning', pca_modules),
-               # ('scanning with EpicsScan', scan_modules),
                ('testing tools',  testing_modules))
 
 
@@ -84,24 +57,6 @@ historical_cruft = ['plugins/xrd/xrd_hkl.py',
 
 modules_imported = {}
 missing = []
-
-
-try:
-    import matplotlib
-    matplotlib.use('WXAgg')
-except:
-    pass
-print( 'Checking dependencies....')
-for desc, mods in all_modules:
-    for impname, modname in mods.items():
-        if impname not in modules_imported:
-            modules_imported[modname] = False
-        try:
-            x = __import__(impname)
-            modules_imported[modname] = True
-        except ImportError:
-            s = (modname + ' '*25)[:25]
-            missing.append('     %s %s' % (s, desc))
 
 ## For Travis-CI, need to write a local site config file
 ##
@@ -163,10 +118,8 @@ larch_icos = glob('icons/*.ic*')
 
 larch_dlls = glob("%s/*" % pjoin('dlls', uname))
 
-data_files = [(bindir,  scripts),
-              (pjoin(larchdir, 'icons'),       larch_icos),
-              (pjoin(larchdir, 'modules'),     larch_mods),
-              (pjoin(larchdir, 'dlls', uname), larch_dlls)]
+data_files = [(pjoin(larchdir, 'icons'),       larch_icos),
+              (pjoin(larchdir, 'modules'),     larch_mods)]
 
 plugin_dir = pjoin(larchdir, 'plugins')
 pluginfiles = []
@@ -302,33 +255,17 @@ def fix_linux_dylibs():
         os.system("%s %s %s/bin/%s" % (fixcmd, larchdlls, prefix, ename))
 
 if INSTALL:
-    remove_cruft(larchdir, historical_cruft)
-    remove_distutils_sitepackage()
+    #remove_cruft(larchdir, historical_cruft)
+    #remove_distutils_sitepackage()
 
     scriptdir = pjoin(sys.exec_prefix, bindir)
     install_prefix = _setup.get_command_obj('install').root
     if install_prefix is not None:
         scriptdir = pjoin(install_prefix, scriptdir)
 
-    for src in scripts:
-        _, fname = psplit(src)
-        dest = pjoin(scriptdir, fname)
-        shutil.copy(src, dest)
-        os.chmod(dest, 493) # mode=755
-
 # final install:
 #   create desktop icons
 #   fix dynamic libraries
-if INSTALL and (uname.startswith('darwin') or uname.startswith('win')):
-    cmd ="%s %s" % (pjoin(sys.exec_prefix, pyexe),
-                    pjoin(sys.exec_prefix, bindir, 'larch_makeicons'))
-    os.system(cmd)
-
-    if uname.startswith('darwin'):
-        fix_darwin_dylibs()
-
-elif uname.startswith('linux'):
-    fix_linux_dylibs()
 
 if len(missing) > 0:
     dl = "#%s#" % ("="*75)

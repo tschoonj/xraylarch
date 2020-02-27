@@ -4,8 +4,6 @@ import cmd
 import os
 import sys
 import numpy
-import matplotlib
-
 from .symboltable import SymbolTable
 from .interpreter import Interpreter
 from .site_config import history_file, show_site_config
@@ -51,9 +49,6 @@ class shell(cmd.Cmd):
                 readline.read_history_file(history_file)
             except IOError:
                 print('could not read history from %s' % history_file)
-
-        if with_wx:
-            matplotlib.use('WXAgg')
 
         self.larch = Interpreter(with_plugins=with_plugins,
                                  historyfile=history_file,

@@ -1,5 +1,0 @@
-mca.py
-roi.py
-xrf_peak.py
-xrf_bgr.py
-xrf_calib.py

@@ -5,7 +5,6 @@ __version__ = '0.9.40'
 import sys
 import numpy
 import scipy
-import matplotlib
 import lmfit
 
 try:
@@ -24,7 +23,7 @@ def make_banner():
              "Python: %s" % (sysvers)]
 
     reqs = []
-    for mod in (numpy, scipy, matplotlib, lmfit, wx):
+    for mod in (numpy, scipy, lmfit):
         try:
             vers = "%s %s" % (mod.__name__, mod.__version__)
         except:
